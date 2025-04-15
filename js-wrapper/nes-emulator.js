@@ -250,7 +250,7 @@ NesTest.writeValue('success', 1)
      */
     async getByteValue(address) {
         let numAddress = this.getNumericAddress(address);
-        const state = await this.runLua(`NesTest.writeValue('thisByte', emu.read(${numAddress}, emu.memType.cpuDebug))`);
+        const state = await this.runLua(`NesTest.writeValue('thisByte', emu.read(${numAddress}, emu.memType.nesMemory))`);
         return state.thisByte;
     }
     /**
@@ -261,7 +261,7 @@ NesTest.writeValue('success', 1)
      */
     async setMemoryByteValue(address, value) {
         let numAddress = this.getNumericAddress(address);
-        await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.cpuDebug)`);
+        await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesMemory)`);
     }
 
     /**
