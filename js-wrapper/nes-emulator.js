@@ -12,14 +12,14 @@ const RETRY_LIMIT = 200;
 
 // NOTE: YES, the .exe is needed on all operating systems, since it depends on mono.
 const mesenExe = mesen.getMesen();
-const needsMono = process.platform !== 'win32';
+const needsMono = (process.platform !== 'win32') && (process.platform !== 'darwin');
 const mesenOptions = ['/DoNotSaveSettings', '/ShowFPS=false', '/ShowLagCounter=false', '/ShowInputDisplay=false']
 
 const tempDir = path.join(os.tmpdir(), 'nes-test'),
     luaDir = path.join(tempDir, 'lua');
 
 /**
- * Controls a NES emulator, allowing you to run it frame-by-frame, and 
+ * Controls a NES emulator, allowing you to run it frame-by-frame, and
  * get values out of it. Be aware that almost every method on this is asynchronous, and should
  * only be called when prefixed with `await`, or you may run into timing issues and emulator crashes!
  */
@@ -72,19 +72,19 @@ class NesEmulator {
     }
 
     /**
-     * Run the given lua code, and return any values you set with 
+     * Run the given lua code, and return any values you set with
      * NesTest.writeValue. Note that this is an internal method, and shouldn't be needed for most tests! The documentation of the
      * lua core is also pretty lacking right now. If you use this, please try to help document it!
      * @param {string} string The lua code to run. This can be spread across multiple lines.
-     * @returns {object} An object containing some internal state used by the tool. Any 
+     * @returns {object} An object containing some internal state used by the tool. Any
      * values you set with NesTest.writeValue() will be available.
      */
     async runLua(string) {
         if (!this.started) {
             throw new Error('Emulator not running!');
         }
-        
-        // Format that the main lua code we use knows how to parse and execute. 
+
+        // Format that the main lua code we use knows how to parse and execute.
         // currentEventNumber is passed between this and the lua to make sure events happen in the right order.
         const lua = `
 local event = {}
@@ -102,7 +102,7 @@ return event`;
 
         fs.writeFileSync(path.join(this.testDirectory, 'current-event.lua'), lua);
 
-        // Wait for the emulator/client lua to update js-status.json with the updated state. 
+        // Wait for the emulator/client lua to update js-status.json with the updated state.
         // Try up to the limit of retries, waiting 50ms between each attempt.
         let returnState = null;
         for (let i = 0; i < RETRY_LIMIT; i++) {
@@ -144,7 +144,7 @@ return event`;
      * you will have to call it multiple times in a loop. Be aware that this command also advances the
      * emulator one frame.
      * @param {object} value An object with keys for any button on the keyboard, and a true
-     * or false value. (True is pressed, false is released.) Available keys: 
+     * or false value. (True is pressed, false is released.) Available keys:
      * - a
      * - b
      * - up
@@ -154,7 +154,7 @@ return event`;
      * - start
      * - select
      * @param {number} controller Which controller to use.
-     * - 0 (player 1) 
+     * - 0 (player 1)
      * - 1 (player 2)
      * @example
      * <caption>This will hold the up and a buttons for one frame</caption>
@@ -165,10 +165,10 @@ return event`;
     }
 
     /**
-     * Take a screenshot of the emulator and store it for later use in tests. There are also two matchers available: 
+     * Take a screenshot of the emulator and store it for later use in tests. There are also two matchers available:
      * - {@link JasmineMatchers#toBeSimilarToImage}
      * - {@link JasmineMatchers#toBeIdenticalToImage}
-     * @example 
+     * @example
      * <caption>Takes a screenshot, saves it to "example.png" and compares it to a local "example.png"</caption>
      *   // Take a screenshot of the intro screen
      *   const screenshot = await emulator.takeScreenshot('example.png');
@@ -210,7 +210,7 @@ NesTest.writeValue('success', 1)
     }
 
     /**
-     * Given a string key, this will look up the label/variable mapped to the name and return that numeric value. Numeric values will 
+     * Given a string key, this will look up the label/variable mapped to the name and return that numeric value. Numeric values will
      * be returned as-is. Everything else will return null.
      * @tutorial Accessing Variables By Name
     * @param {Number|String} address Either a numeric address or a string representing an address.
@@ -264,7 +264,7 @@ NesTest.writeValue('success', 1)
     }
 
     /**
-     * Set a _data_ address on the NES to the given value. This will have no effect on variable memory addresses, only 
+     * Set a _data_ address on the NES to the given value. This will have no effect on variable memory addresses, only
      * on hardcoded PRG data.
      * @param {Number|String} address Either a numeric address, or a string representing a C or assembly variable
      * @param {Number} value The value to set the given byte to
@@ -333,7 +333,7 @@ NesTest.writeValue('success', 1)
     }
 
     /**
-     * Set a _data_ address on the NES to the given value. This will have no effect on variable memory addresses, only 
+     * Set a _data_ address on the NES to the given value. This will have no effect on variable memory addresses, only
      * on hardcoded PRG data.
      * @param {Number|String} address Either a numeric address, or a string representing a C or assembly variable
      * @param {Number} value The value to set the given word to
@@ -375,7 +375,7 @@ NesTest.writeValue('range', '"' .. table.concat(a, ",") .. '"')
 
         return state.range.split(',').map(i => parseInt(i, 10));
     }
-    
+
     /**
      * Generates lua format from a simple json object
      * @param {@} value A json object
@@ -415,7 +415,7 @@ NesTest.writeValue('range', '"' .. table.concat(a, ",") .. '"')
 
         // Run mesen, get the result code
         this.emulatorHandle = childProcess.spawn(
-            needsMono ? 'mono' : mesenExe, 
+            needsMono ? 'mono' : mesenExe,
             [...(needsMono ? [mesenExe] : []), ...(this.useTestRunner ? ['--testrunner'] : []), ...mesenOptions, this.romFile, this.testFile],
             {cwd: tempDir}
         );
@@ -427,7 +427,7 @@ NesTest.writeValue('range', '"' .. table.concat(a, ",") .. '"')
         this.emulatorHandle.stderr.on('data', msg => {
             console.debug('[Mesen stderr]', msg.toString());
         });
-        
+
         this.emulatorHandle.on('error', error => {
             this.started = false;
             this.emulatorHandle = false;
