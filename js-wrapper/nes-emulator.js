@@ -13,7 +13,8 @@ const RETRY_LIMIT = 200;
 // NOTE: YES, the .exe is needed on all operating systems, since it depends on mono.
 const mesenExe = mesen.getMesen();
 const needsMono = (process.platform !== 'win32') && (process.platform !== 'darwin');
-const mesenOptions = ['/DoNotSaveSettings', '/ShowFPS=false', '/ShowLagCounter=false', '/ShowInputDisplay=false']
+// const mesenOptions = ['/DoNotSaveSettings', '/ShowFPS=false', '/ShowLagCounter=false', '/ShowInputDisplay=false']
+const mesenOptions = []
 
 const tempDir = path.join(os.tmpdir(), 'nes-test'),
     luaDir = path.join(tempDir, 'lua');
@@ -161,7 +162,7 @@ return event`;
      * await emulator.sendInput({up: true, a: true})
      */
     async sendInput(value, controller=0) {
-        await this.runLua(`emu.setInput(${controller}, ${this.getLuaFormat(value)})`);
+        await this.runLua(`emu.setInput(${this.getLuaFormat(value)}, ${controller})`);
     }
 
     /**
