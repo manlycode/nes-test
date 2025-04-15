@@ -1624,7 +1624,7 @@
     <ScriptFontStyle>Regular</ScriptFontStyle>
     <ScriptFontSize>12</ScriptFontSize>
     <ScriptZoom>100</ScriptZoom>
-    <ScriptTimeout>1000</ScriptTimeout>
+    <ScriptTimeout>5000</ScriptTimeout>
     <AssemblerCodeHighlighting>true</AssemblerCodeHighlighting>
     <AssemblerOpcodeColor ColorString="#162525" />
     <AssemblerLabelDefinitionColor ColorString="Blue" />
