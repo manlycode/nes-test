@@ -273,7 +273,7 @@ NesTest.writeValue('success', 1)
      */
     async setPrgByteValue(address, value) {
         let numAddress = this.getNumericAddress(address);
-        await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.prgRom)`);
+        await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesPrgRom)`);
     }
 
     /**
@@ -284,7 +284,7 @@ NesTest.writeValue('success', 1)
      */
     async setPpuByteValue(address, value) {
         let numAddress = this.getNumericAddress(address);
-        await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.ppuDebug)`);
+        await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesPpuDebug)`);
     }
 
     /**
@@ -295,7 +295,7 @@ NesTest.writeValue('success', 1)
      */
     async getPpuByteValue(address) {
         let numAddress = this.getNumericAddress(address);
-        const state = await this.runLua(`NesTest.writeValue('thisByte', emu.read(${numAddress}, emu.memType.ppuDebug))`);
+        const state = await this.runLua(`NesTest.writeValue('thisByte', emu.read(${numAddress}, emu.memType.nesPpuDebug))`);
         return state.thisByte;
     }
 
@@ -307,7 +307,7 @@ NesTest.writeValue('success', 1)
      */
     async getWordValue(address) {
         let numAddress = this.getNumericAddress(address);
-        const state = await this.runLua(`NesTest.writeValue('thisWord', emu.readWord(${numAddress}, emu.memType.cpuDebug))`);
+        const state = await this.runLua(`NesTest.writeValue('thisWord', emu.readWord(${numAddress}, emu.memType.nesDebug))`);
         return state.thisWord;
     }
     /**
@@ -318,7 +318,7 @@ NesTest.writeValue('success', 1)
      */
     async getPpuWordValue(address) {
         let numAddress = this.getNumericAddress(address);
-        const state = await this.runLua(`NesTest.writeValue('thisWord', emu.readWord(${numAddress}, emu.memType.ppuDebug))`);
+        const state = await this.runLua(`NesTest.writeValue('thisWord', emu.readWord(${numAddress}, emu.memType.nesPpuDebug))`);
         return state.thisWord;
     }
 
@@ -330,7 +330,7 @@ NesTest.writeValue('success', 1)
      */
      async setMemoryWordValue(address, value) {
         let numAddress = this.getNumericAddress(address);
-        await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.cpuDebug)`);
+        await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesDebug)`);
     }
 
     /**
@@ -342,7 +342,7 @@ NesTest.writeValue('success', 1)
      */
     async setPrgWordValue(address, value) {
         let numAddress = this.getNumericAddress(address);
-        await this.runLua(`emu.writeWord(${numAddress}, ${value}, emu.memType.prgRom)`);
+        await this.runLua(`emu.writeWord(${numAddress}, ${value}, emu.memType.nesPrgRom)`);
     }
 
     /**
@@ -353,7 +353,7 @@ NesTest.writeValue('success', 1)
      */
     async setPpuWordValue(address, value) {
         let numAddress = this.getNumericAddress(address);
-        await this.runLua(`emu.writeWord(${numAddress}, ${value}, emu.memType.ppuDebug)`);
+        await this.runLua(`emu.writeWord(${numAddress}, ${value}, emu.memType.nesPpuDebug)`);
     }
 
 
@@ -369,7 +369,7 @@ NesTest.writeValue('success', 1)
         const state = await this.runLua(`
 a = {}
 for i=1,${length} do
-    a[i] = emu.read(${numAddress} + i, emu.memType.cpuDebug)
+    a[i] = emu.read(${numAddress} + i, emu.memType.nesDebug)
 end
 NesTest.writeValue('range', '"' .. table.concat(a, ",") .. '"')
         `);
