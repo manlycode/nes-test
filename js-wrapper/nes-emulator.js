@@ -165,6 +165,32 @@ return event`;
         await this.runLua(`emu.setInput(${this.getLuaFormat(value)}, ${controller})`);
     }
 
+        /**
+     * Press down one or more buttons for the next frame. If you need to do this for multiple frames,
+     * you will have to call it multiple times in a loop. Be aware that this command also advances the
+     * emulator one frame.
+     * @param {object} value An object with keys for any button on the keyboard, and a true
+     * or false value. (True is pressed, false is released.) Available keys:
+     * - a
+     * - b
+     * - up
+     * - down
+     * - left
+     * - right
+     * - start
+     * - select
+     * @param {number} controller Which controller to use.
+     * - 0 (player 1)
+     * - 1 (player 2)
+     * @example
+     * <caption>This will hold the up and a buttons for one frame</caption>
+     * await emulator.sendInput({up: true, a: true})
+     */
+    async runTest() {
+        await this.sendInput({right: true});
+        await this.runCpuFrames(1);
+    }
+
     /**
      * Take a screenshot of the emulator and store it for later use in tests. There are also two matchers available:
      * - {@link JasmineMatchers#toBeSimilarToImage}
@@ -331,6 +357,38 @@ NesTest.writeValue('success', 1)
      async setMemoryWordValue(address, value) {
         let numAddress = this.getNumericAddress(address);
         await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesDebug)`);
+    }
+
+        /**
+     * Sets a _memory_ address on the NES to the given value. Note this will have no effect on hardcoded memory addresses.
+     * @param {Number|String} address Either a numeric address, or a string representing a C or assembly variable
+     * @param {Number|String} value The value to set the given word to
+     * @tutorial Accessing Variables By Name
+     */
+    async setMemoryPtr(address, value) {
+        let numValue = this.getNumericAddress(value);
+        let loByte = numValue & 0xFF;
+        let hiByte = (numValue & 0xFF00) >>  8;
+        let numAddress = this.getNumericAddress(address);
+
+        await this.runLua(`emu.write(${numAddress}, ${loByte}, emu.memType.nesDebug)`);
+        await this.runLua(`emu.write(${numAddress+1}, ${hiByte}, emu.memType.nesDebug)`);
+    }
+
+            /**
+     * Sets a _memory_ address on the NES to the given value. Note this will have no effect on hardcoded memory addresses.
+     * @param {Number|String} address Either a numeric address, or a string representing a C or assembly variable
+     * @param {Number|String} value The value to set the given word to
+     * @tutorial Accessing Variables By Name
+     */
+    async currentTest(value) {
+        let numValue = this.getNumericAddress(value);
+        let loByte = numValue & 0xFF;
+        let hiByte = (numValue & 0xFF00) >>  8;
+        let numAddress = this.getNumericAddress("current_test");
+
+        await this.runLua(`emu.write(${numAddress}, ${loByte}, emu.memType.nesDebug)`);
+        await this.runLua(`emu.write(${numAddress+1}, ${hiByte}, emu.memType.nesDebug)`);
     }
 
     /**
