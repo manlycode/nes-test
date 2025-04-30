@@ -244,25 +244,25 @@ NesTest.writeValue('success', 1)
      * @throws {Error} An error if a string address is not found in the game's debug file. (Or the file is not present)
      * @returns {Number} A numeric address somewhere in the rom.
      */
-    getNumericAddress(address) {
+    getNumericAddress(address, offset = 0) {
         if (typeof address === 'string') {
             if (!this.nesRomFileWrapper.symbols) {
                 throw new Error('Debug file not found next to rom file! Cannot look addresses by name.');
             }
             if (typeof this.nesRomFileWrapper.symbols.c[address] !== 'undefined') {
-                return this.nesRomFileWrapper.symbols.c[address];
+                return this.nesRomFileWrapper.symbols.c[address]+offset;
             }
             if (typeof this.nesRomFileWrapper.symbols.assembly[address] !== 'undefined') {
-                return this.nesRomFileWrapper.symbols.assembly[address];
+                return this.nesRomFileWrapper.symbols.assembly[address]+offset;
             }
             // Last ditch effort, try to find a c symbol from assembly, since some variables don't get copied.
             // See: https://cc65.github.io/mailarchive/2002-12/1875.html
             if (typeof this.nesRomFileWrapper.symbols.assembly['_' + address] !== 'undefined') {
-                return this.nesRomFileWrapper.symbols.assembly['_' + address];
+                return this.nesRomFileWrapper.symbols.assembly['_' + address]+offset;
             }
             throw new Error('Address name not found in rom: ' + address);
         } else if (typeof address === 'number') {
-            return address;
+            return address+offset;
         } else {
             return null;
         }
@@ -274,19 +274,20 @@ NesTest.writeValue('success', 1)
      * @returns {Number} The requested byte.
      * @tutorial Accessing Variables By Name
      */
-    async getByteValue(address) {
-        let numAddress = this.getNumericAddress(address);
+    async getByteValue(address, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         const state = await this.runLua(`NesTest.writeValue('thisByte', emu.read(${numAddress}, emu.memType.nesMemory))`);
         return state.thisByte;
     }
+
     /**
      * Sets a _memory_ address on the NES to the given value. Note this will have no effect on hardcoded memory addresses.
      * @param {Number|String} address Either a numeric address, or a string representing a C or assembly variable
      * @param {Number} value The value to set the given byte to
      * @tutorial Accessing Variables By Name
      */
-    async setMemoryByteValue(address, value) {
-        let numAddress = this.getNumericAddress(address);
+    async setMemoryByteValue(address, value, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesMemory)`);
     }
 
@@ -297,8 +298,8 @@ NesTest.writeValue('success', 1)
      * @param {Number} value The value to set the given byte to
      * @tutorial Accessing Variables By Name
      */
-    async setPrgByteValue(address, value) {
-        let numAddress = this.getNumericAddress(address);
+    async setPrgByteValue(address, value, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesPrgRom)`);
     }
 
@@ -308,8 +309,8 @@ NesTest.writeValue('success', 1)
      * @param {Number} value The value to set the given byte to.
      * @tutorial Accessing Variables By Name
      */
-    async setPpuByteValue(address, value) {
-        let numAddress = this.getNumericAddress(address);
+    async setPpuByteValue(address, value, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesPpuDebug)`);
     }
 
@@ -319,8 +320,8 @@ NesTest.writeValue('success', 1)
      * @returns {Number} The requested byte.
      * @tutorial Accessing Variables By Name
      */
-    async getPpuByteValue(address) {
-        let numAddress = this.getNumericAddress(address);
+    async getPpuByteValue(address, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         const state = await this.runLua(`NesTest.writeValue('thisByte', emu.read(${numAddress}, emu.memType.nesPpuDebug))`);
         return state.thisByte;
     }
@@ -331,8 +332,8 @@ NesTest.writeValue('success', 1)
      * @returns {Number} The requested word.
      * @tutorial Accessing Variables By Name
      */
-    async getWordValue(address) {
-        let numAddress = this.getNumericAddress(address);
+    async getWordValue(address, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         const state = await this.runLua(`NesTest.writeValue('thisWord', emu.readWord(${numAddress}, emu.memType.nesDebug))`);
         return state.thisWord;
     }
@@ -342,8 +343,8 @@ NesTest.writeValue('success', 1)
      * @returns {Number} The requested word.
      * @tutorial Accessing Variables By Name
      */
-    async getPpuWordValue(address) {
-        let numAddress = this.getNumericAddress(address);
+    async getPpuWordValue(address, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         const state = await this.runLua(`NesTest.writeValue('thisWord', emu.readWord(${numAddress}, emu.memType.nesPpuDebug))`);
         return state.thisWord;
     }
@@ -354,8 +355,8 @@ NesTest.writeValue('success', 1)
      * @param {Number} value The value to set the given word to
      * @tutorial Accessing Variables By Name
      */
-     async setMemoryWordValue(address, value) {
-        let numAddress = this.getNumericAddress(address);
+     async setMemoryWordValue(address, value, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         await this.runLua(`emu.write(${numAddress}, ${value}, emu.memType.nesDebug)`);
     }
 
@@ -365,11 +366,11 @@ NesTest.writeValue('success', 1)
      * @param {Number|String} value The value to set the given word to
      * @tutorial Accessing Variables By Name
      */
-    async setMemoryPtr(address, value) {
+    async setMemoryPtr(address, value, offset = 0) {
         let numValue = this.getNumericAddress(value);
         let loByte = numValue & 0xFF;
         let hiByte = (numValue & 0xFF00) >>  8;
-        let numAddress = this.getNumericAddress(address);
+        let numAddress = this.getNumericAddress(address, offset);
 
         await this.runLua(`emu.write(${numAddress}, ${loByte}, emu.memType.nesDebug)`);
         await this.runLua(`emu.write(${numAddress+1}, ${hiByte}, emu.memType.nesDebug)`);
@@ -398,8 +399,8 @@ NesTest.writeValue('success', 1)
      * @param {Number} value The value to set the given word to
      * @tutorial Accessing Variables By Name
      */
-    async setPrgWordValue(address, value) {
-        let numAddress = this.getNumericAddress(address);
+    async setPrgWordValue(address, value, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         await this.runLua(`emu.writeWord(${numAddress}, ${value}, emu.memType.nesPrgRom)`);
     }
 
@@ -409,8 +410,8 @@ NesTest.writeValue('success', 1)
      * @param {Number} value The value to set the given word to.
      * @tutorial Accessing Variables By Name
      */
-    async setPpuWordValue(address, value) {
-        let numAddress = this.getNumericAddress(address);
+    async setPpuWordValue(address, value, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
         await this.runLua(`emu.writeWord(${numAddress}, ${value}, emu.memType.nesPpuDebug)`);
     }
 
@@ -433,6 +434,25 @@ NesTest.writeValue('range', '"' .. table.concat(a, ",") .. '"')
         `);
 
         return state.range.split(',').map(i => parseInt(i, 10));
+    }
+     /**
+     * Get a sequence of bytes from the game's memory, of the length requested.
+     * @param {Number|String} address Either a numeric address, or a string representing a C or assembly variable.
+     * @param {Number} length How many bytes to include in the sequence.
+     * @returns {Number[]} An array with the requested bytes.
+     * @tutorial Accessing Variables By Name
+     */
+    async getByteRangeHex(address, length, offset = 0) {
+        let numAddress = this.getNumericAddress(address, offset);
+        const state = await this.runLua(`
+    a = {}
+    for i=1,${length} do
+    a[i] = emu.read(${numAddress} + i, emu.memType.nesDebug)
+    end
+    NesTest.writeValue('range', '"' .. table.concat(a, ",") .. '"')
+        `);
+
+        return state.range.split(',').map(i => "0x"+ parseInt(i, 10).toString(16));
     }
 
     /**
