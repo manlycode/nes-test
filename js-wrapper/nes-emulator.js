@@ -451,8 +451,11 @@ NesTest.writeValue('range', '"' .. table.concat(a, ",") .. '"')
     end
     NesTest.writeValue('range', '"' .. table.concat(a, ",") .. '"')
         `);
+        let strArray = state.range.split(',');
+        let lastEl = strArray.pop();
+        strArray.unshift(lastEl);
 
-        return state.range.split(',').map(i => "0x"+ parseInt(i, 10).toString(16));
+        return strArray.map(i => "$"+ parseInt(i, 10).toString(16)).join(" ");
     }
 
     /**

@@ -132,7 +132,7 @@ class NesTestJasmineMatchers {
                         } else {
                             return {
                                 pass: false,
-                                message: "Expected 0x" + expectedString + " but was 0x" + actualString + "."
+                                message: "Expected " + expectedString + " but was " + actualString + "."
                             }
                         }
                     }
